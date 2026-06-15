@@ -13,6 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+/* All font sizes in px; browser zoom works correctly as no px size is set on :root/html */
 :root{
   --bg:#0B0814;
   --bg1:#100D1E;
@@ -30,7 +31,46 @@
   --sans:'Bricolage Grotesque',sans-serif;
   --mono:'DM Mono',monospace;
 }
+/* ── SKIP LINK ── */
+.skip-link{
+  position:absolute;top:-100px;left:16px;z-index:10000;
+  font-family:var(--mono);font-size:13px;font-weight:400;
+  color:var(--bg);background:var(--v);
+  padding:12px 20px;text-decoration:none;letter-spacing:.08em;
+  transition:top .2s;
+}
+.skip-link:focus{top:16px}
+
+/* ── FOCUS STYLES ── */
+:focus{outline:none}
+:focus-visible{
+  outline:2px solid var(--v);
+  outline-offset:3px;
+}
+a:focus-visible,button:focus-visible{
+  outline:2px solid var(--v);
+  outline-offset:3px;
+  border-radius:2px;
+}
+
 body{font-family:var(--sans);background:var(--bg);color:var(--ink);overflow-x:hidden;cursor:none}
+
+/* Restore cursor for keyboard/non-pointer users */
+@media (pointer:coarse),(pointer:none){
+  body{cursor:auto}
+  #cur,#cur-r{display:none}
+}
+
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+  #cur,#cur-r{display:none}
+  body{cursor:auto}
+}
 
 /* ── CURSOR ── */
 #cur{position:fixed;width:8px;height:8px;border-radius:50%;background:var(--v);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);mix-blend-mode:screen;transition:width .2s,height .2s}
@@ -72,9 +112,10 @@ nav{
   font-family:var(--mono);font-size:11px;color:var(--v);
   letter-spacing:.16em;text-transform:uppercase;
   display:flex;align-items:center;gap:10px;
-  margin-bottom:36px;overflow:hidden;
+  margin-bottom:36px;
 }
-.h-kicker>span{display:block;transform:translateY(120%)}
+.h-kicker>span{display:block;overflow:hidden;padding-bottom:.1em}
+.h-kicker>span>i{display:block;font-style:normal;transform:translateY(120%)}
 .h-kicker::before{content:'';width:24px;height:1px;background:var(--v);flex-shrink:0}
 
 h1.hero-name{
@@ -352,10 +393,11 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
 </head>
 <body>
 
+<a href="#main-content" class="skip-link">Skip to main content</a>
 <div id="cur"></div>
 <div id="cur-r"></div>
 
-<nav>
+<header><nav>
   <a class="nav-sig" href="#">stephen<b>.</b>salyer</a>
   <div class="nav-r">
     <ul class="nav-links">
@@ -365,13 +407,14 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
       <li><a href="#contact">Contact</a></li>
     </ul>
   </div>
-</nav>
+</nav></header>
 
+<main id="main-content">
 <!-- HERO -->
 <section id="hero">
   <div class="hero-l">
     <div>
-      <div class="h-kicker"><span>Staff Design Systems Designer</span></div>
+      <div class="h-kicker"><span><i>Staff Design Systems Designer</i></span></div>
       <h1 class="hero-name"><span><i>Stephen</i></span><span><i>Salyer</i></span></h1>
       <p class="hero-tagline"><span><i>I design the systems</i></span><span><i>designers and AI work from.</i></span></p>
     </div>
@@ -386,7 +429,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
     </div></div>
   </div>
   <div class="hero-r">
-    <canvas id="token-cv"></canvas>
+    <canvas id="token-cv" role="img" aria-label="Interactive W3C DTCG token architecture diagram showing primitive, semantic, and component token layers. Click any node to trace token dependencies."></canvas>
     <div class="cv-hint">Click a node to trace dependencies</div>
     <div class="cv-legend">
       <div>W3C DTCG Token Architecture</div>
@@ -644,9 +687,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
     <p class="contact-sub">Looking for a Staff or Principal Design Systems Designer who can own the architecture, make the org case, and ship the thing. Remote roles at Staff or Principal level.</p>
     <div class="c-links">
       <a href="mailto:Stephenpsalyer@gmail.com" class="c-link"><span class="c-lbl">Email</span><span class="c-val">Stephenpsalyer@gmail.com <span class="c-arr">→</span></span></a>
-      <a href="https://www.stephensalyer.com" target="_blank" class="c-link"><span class="c-lbl">Website</span><span class="c-val">stephensalyer.com <span class="c-arr">→</span></span></a>
-      <a href="https://www.linkedin.com/in/stephen-salyer/" target="_blank" class="c-link"><span class="c-lbl">LinkedIn</span><span class="c-val">stephen-salyer <span class="c-arr">→</span></span></a>
-      <a href="https://github.com/stephen-salyer" target="_blank" class="c-link"><span class="c-lbl">GitHub</span><span class="c-val">stephen-salyer <span class="c-arr">→</span></span></a>
+      <a href="https://www.stephensalyer.com" target="_blank" rel="noopener noreferrer" class="c-link"><span class="c-lbl">Website</span><span class="c-val">stephensalyer.com <span class="c-arr">→</span></span></a>
+      <a href="https://www.linkedin.com/in/stephen-salyer/" target="_blank" rel="noopener noreferrer" class="c-link"><span class="c-lbl">LinkedIn</span><span class="c-val">stephen-salyer <span class="c-arr">→</span></span></a>
+      <a href="https://github.com/stephen-salyer" target="_blank" rel="noopener noreferrer" class="c-link"><span class="c-lbl">GitHub</span><span class="c-val">stephen-salyer <span class="c-arr">→</span></span></a>
     </div>
   </div>
   <div class="contact-r">
@@ -660,6 +703,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
   </div>
 </section>
 
+</main>
 <footer>
   <div class="ft">© 2026 Stephen Salyer · St. Louis, MO</div>
   <div class="ft">stephensalyer.com · St. Louis, MO</div>
@@ -669,6 +713,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 <script>
+// Declared first — used by both Three.js and GSAP blocks
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 /* ── CURSOR ── */
 const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
 let mx=0,my=0,rx=0,ry=0;
@@ -738,7 +785,32 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.le
 
   // Click interaction
   const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
-  canvas.addEventListener('click',e=>{
+  // Keyboard access for canvas
+canvas.setAttribute('tabindex','0');
+canvas.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){
+    e.preventDefault();
+    // Cycle through nodes on Enter/Space
+    const selIdx = sel ? nodes.indexOf(sel) : -1;
+    const nextIdx = (selIdx+1) % nodes.length;
+    const nextNode = nodes[nextIdx];
+    sel=nextNode;
+    nodes.forEach(n=>{n.dim=true;n.lit=false});
+    edges.forEach(e2=>e2.baseLit=false);
+    nextNode.lit=true;nextNode.dim=false;
+    edges.forEach(e2=>{
+      if(e2.f===nextNode||e2.t===nextNode){
+        e2.baseLit=true;e2.f.dim=false;e2.f.lit=true;e2.t.dim=false;e2.t.lit=true;
+      }
+    });
+  }
+  if(e.key==='Escape'){
+    sel=null;
+    nodes.forEach(n=>{n.dim=false;n.lit=false});
+    edges.forEach(e2=>e2.baseLit=false);
+  }
+});
+canvas.addEventListener('click',e=>{
     const r=canvas.getBoundingClientRect();
     mouse.x=((e.clientX-r.left)/r.width)*2-1;
     mouse.y=-((e.clientY-r.top)/r.height)*2+1;
@@ -769,7 +841,8 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.le
 
   let t=0;
   (function tick(){
-    requestAnimationFrame(tick);t+=.006;
+    if(!prefersReducedMotion) requestAnimationFrame(tick);
+    t+=.006;
     scene.rotation.y=t*.05+mouseX*.06;scene.rotation.x=-mouseY*.03;
     nodes.forEach(n=>{
       const pulse=.92+Math.sin(t*n.sp+n.ph)*.08;
@@ -794,28 +867,31 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.le
 
 /* ── GSAP ── */
 gsap.registerPlugin(ScrollTrigger);
-const tl=gsap.timeline({delay:.25});
-tl.to('.h-kicker>span',{y:0,duration:.9,ease:'power4.out'})
-  .to('h1.hero-name span>i',{y:0,stagger:.08,duration:1.1,ease:'power4.out'},'-=.65')
-  .to('.hero-tagline span>i',{y:0,stagger:.06,duration:1,ease:'power4.out'},'-=.75')
-  .to('.p-n',{y:0,stagger:.07,duration:.85,ease:'power3.out'},'-=.55')
-  .to('.p-l',{y:0,opacity:1,stagger:.07,duration:.65,ease:'power3.out'},'-=.45')
-  .to('.hero-ctas>div',{y:0,duration:.8,ease:'power3.out'},'-=.4');
+
+// reduced motion: dur=0 collapses all GSAP animations to instant
+const dur = prefersReducedMotion ? 0 : 1;
+const tl=gsap.timeline({delay: prefersReducedMotion ? 0 : .25});
+tl.to('.h-kicker span>i',{y:0,duration:dur*.9,ease:'power4.out'})
+  .to('h1.hero-name span>i',{y:0,stagger:.08,duration:dur*1.1,ease:'power4.out'},'-=.65')
+  .to('.hero-tagline span>i',{y:0,stagger:.06,duration:dur,ease:'power4.out'},'-=.75')
+  .to('.p-n',{y:0,stagger:.07,duration:dur*.85,ease:'power3.out'},'-=.55')
+  .to('.p-l',{y:0,opacity:1,stagger:.07,duration:dur*.65,ease:'power3.out'},'-=.45')
+  .to('.hero-ctas>div',{y:0,duration:dur*.8,ease:'power3.out'},'-=.4');
 
 document.querySelectorAll('.sec-label>span').forEach(el=>{
-  ScrollTrigger.create({trigger:el,start:'top 86%',onEnter(){gsap.to(el,{y:0,duration:.8,ease:'power3.out'})}});
+  ScrollTrigger.create({trigger:el,start:'top 86%',onEnter(){gsap.to(el,{y:0,duration:dur*.8,ease:'power3.out'})}});
 });
 document.querySelectorAll('.sec-title>span').forEach(el=>{
-  ScrollTrigger.create({trigger:el.parentElement,start:'top 86%',onEnter(){gsap.to(el.querySelector('i'),{y:0,duration:1,ease:'power4.out'})}});
+  ScrollTrigger.create({trigger:el.parentElement,start:'top 86%',onEnter(){gsap.to(el.querySelector('i'),{y:0,duration:dur,ease:'power4.out'})}});
 });
 document.querySelectorAll('.case').forEach((el,i)=>{
-  gsap.from(el,{opacity:0,y:28,scrollTrigger:{trigger:el,start:'top 88%'},duration:.75,ease:'power3.out',delay:i*.04});
+  gsap.from(el,{opacity:0,y:28,scrollTrigger:{trigger:el,start:'top 88%'},duration:dur*.75,ease:'power3.out',delay:prefersReducedMotion?0:i*.04});
 });
 document.querySelectorAll('.exp-item').forEach((el,i)=>{
-  gsap.from(el,{opacity:0,y:20,scrollTrigger:{trigger:el,start:'top 86%'},duration:.7,ease:'power3.out',delay:i*.06});
+  gsap.from(el,{opacity:0,y:20,scrollTrigger:{trigger:el,start:'top 86%'},duration:dur*.7,ease:'power3.out',delay:prefersReducedMotion?0:i*.06});
 });
-gsap.from('.contact-h',{opacity:0,y:40,scrollTrigger:{trigger:'#contact',start:'top 78%'},duration:1,ease:'power4.out'});
-gsap.from('.contact-sub',{opacity:0,y:20,scrollTrigger:{trigger:'#contact',start:'top 78%'},duration:.8,ease:'power3.out',delay:.2});
+gsap.from('.contact-h',{opacity:0,y:40,scrollTrigger:{trigger:'#contact',start:'top 78%'},duration:dur,ease:'power4.out'});
+gsap.from('.contact-sub',{opacity:0,y:20,scrollTrigger:{trigger:'#contact',start:'top 78%'},duration:dur*.8,ease:'power3.out',delay:prefersReducedMotion?0:.2});
 </script>
 </body>
 </html>
