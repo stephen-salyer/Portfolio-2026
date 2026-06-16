@@ -386,7 +386,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
   .hero-r,.case-r{height:300px}
   nav,.context-strip,.sec-head,.case-l,.about-l,.about-r,.contact-l,.contact-r,.exp-item{padding-left:20px;padding-right:20px}
   .case.plugins{grid-template-columns:1fr}
-  .plugin-pair{grid-template-columns:1fr}
+  .case.full[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important}
   .plugin-img-link img{height:260px}
   .case.full .case-l{grid-template-columns:1fr!important;gap:32px}
   .exp-item{grid-template-columns:1px 1fr;gap:0 24px}
@@ -517,10 +517,11 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
       </div>
     </div>
 
-    <!-- 03 Plugins — full width -->
-    <div class="case full">
-      <div class="case-l" style="display:grid;grid-template-columns:1fr 1fr;gap:48px;border-right:none">
-        <div>
+    <!-- 03 Plugins — two paired columns, text above image each -->
+    <div class="case full" style="display:grid;grid-template-columns:1fr 1fr;min-height:auto;border-top:1px solid var(--br)">
+      <!-- Plugin 1: Variable Alias Flow -->
+      <div class="plugin-col" style="display:flex;flex-direction:column;border-right:1px solid var(--br)">
+        <div style="padding:48px 48px 32px">
           <div class="case-idx">03</div>
           <div class="case-sub">Original Tool · Live on Figma Community</div>
           <h3 class="case-title">Variable Alias Flow</h3>
@@ -528,20 +529,22 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
           <div class="case-tags" style="margin-top:20px"><span class="ctag">Figma Plugin API</span><span class="ctag">Token visualization</span><span class="ctag">Variables API</span></div>
           <a href="https://www.figma.com/community/plugin/1554529453850300350/variable-alias-flow" target="_blank" rel="noopener" class="plugin-cta">View on Figma Community <span class="plugin-arr">↗</span></a>
         </div>
-        <div>
-          <div class="case-sub" style="margin-top:36px">Original Tool · Live on Figma Community</div>
+        <a href="https://www.figma.com/community/plugin/1554529453850300350/variable-alias-flow" target="_blank" rel="noopener" class="plugin-img-link" style="margin-top:auto">
+          <img src="variable-alias-flow-plugin.webp" alt="Variable Alias Flow Figma plugin" loading="lazy">
+          <div class="plugin-img-label">Variable Alias Flow ↗</div>
+        </a>
+      </div>
+      <!-- Plugin 2: Contrast Checker -->
+      <div class="plugin-col" style="display:flex;flex-direction:column">
+        <div style="padding:48px 48px 32px">
+          <div class="case-idx" style="opacity:0">03</div>
+          <div class="case-sub">Original Tool · Live on Figma Community</div>
           <h3 class="case-title">Design System Contrast Checker</h3>
           <p class="case-desc">WCAG 2.1 AA contrast validation at scale across 160+ brand token collections. Tests every foreground/background token combination and surfaces failures by component — making accessibility audits tractable at enterprise scale.</p>
           <div class="case-tags" style="margin-top:20px"><span class="ctag">WCAG 2.1 AA</span><span class="ctag">Figma Plugin API</span><span class="ctag">Accessibility</span><span class="ctag">Token automation</span></div>
           <a href="https://www.figma.com/community/plugin/1554527680728544182/design-system-contrast-checker" target="_blank" rel="noopener" class="plugin-cta">View on Figma Community <span class="plugin-arr">↗</span></a>
         </div>
-      </div>
-      <div class="plugin-pair">
-        <a href="https://www.figma.com/community/plugin/1554529453850300350/variable-alias-flow" target="_blank" rel="noopener" class="plugin-img-link">
-          <img src="variable-alias-flow-plugin.webp" alt="Variable Alias Flow Figma plugin" loading="lazy">
-          <div class="plugin-img-label">Variable Alias Flow ↗</div>
-        </a>
-        <a href="https://www.figma.com/community/plugin/1554527680728544182/design-system-contrast-checker" target="_blank" rel="noopener" class="plugin-img-link">
+        <a href="https://www.figma.com/community/plugin/1554527680728544182/design-system-contrast-checker" target="_blank" rel="noopener" class="plugin-img-link" style="margin-top:auto">
           <img src="Design-system-contrast-checker-figma-plugin.png" alt="Design system contrast checker Figma plugin" loading="lazy">
           <div class="plugin-img-label">Design System Contrast Checker ↗</div>
         </a>
