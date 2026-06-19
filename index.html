@@ -522,7 +522,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;b
     </div>
 
     <!-- 03 Plugins — two paired columns, text above image each -->
-    <div class="case full plugin-case">
+    <div class="case plugin-case">
       <!-- Plugin 1: Variable Alias Flow -->
       <div class="plugin-col" style="display:flex;flex-direction:column;border-right:1px solid var(--br)">
         <div style="padding:48px 48px 32px">
@@ -742,7 +742,10 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.le
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   renderer.setSize(W,H);
   renderer.setClearColor(0,0);
+  renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure=.85;
   const scene=new THREE.Scene();
+  scene.fog=new THREE.FogExp2(0x000212,.006);
   const cam=new THREE.PerspectiveCamera(55,W/H,.1,1000);
   cam.position.set(0,2,26);
 
@@ -750,26 +753,60 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.le
   const nodes=[],edges=[];
   let sel=null;
 
-  // ── NODES with orbital motion ─────────────────────────────────
+  // ── Soft glow sprite texture generator (radial gradient, no hard edges) ──
+  function makeGlowTexture(hexColor){
+    const size=128;
+    const cv=document.createElement('canvas');
+    cv.width=cv.height=size;
+    const ctx=cv.getContext('2d');
+    const r=(hexColor>>16&255), g=(hexColor>>8&255), b=(hexColor&255);
+    const grad=ctx.createRadialGradient(size/2,size/2,0,size/2,size/2,size/2);
+    grad.addColorStop(0,   `rgba(${r},${g},${b},1)`);
+    grad.addColorStop(0.45,`rgba(${r},${g},${b},.85)`);
+    grad.addColorStop(0.75,`rgba(${r},${g},${b},.18)`);
+    grad.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+    ctx.fillStyle=grad;
+    ctx.fillRect(0,0,size,size);
+    const tex=new THREE.CanvasTexture(cv);
+    tex.needsUpdate=true;
+    return tex;
+  }
+  const glowTextures={
+    p:makeGlowTexture(C.p), s:makeGlowTexture(C.s), c:makeGlowTexture(C.c)
+  };
+  const whiteGlow=makeGlowTexture(0xffffff);
+
+  // ── NODES: soft glow sprite (outer halo) + bright sprite core ──────────
   function mkLayer(type,count,radius,ySpread){
     for(let i=0;i<count;i++){
       const a=(i/count)*Math.PI*2;
       const r=radius+(Math.random()-.5)*2.5;
-      const sz=type==='p'?.13:type==='s'?.21:.3;
-      const geo=new THREE.SphereGeometry(sz,12,12);
-      const mat=new THREE.MeshBasicMaterial({color:C[type]});
-      const m=new THREE.Mesh(geo,mat);
-      m.position.set(Math.cos(a)*r,(Math.random()-.5)*ySpread,Math.sin(a)*r);
-      const rg=new THREE.RingGeometry(sz*2.2,sz*3.2,24);
-      const rm=new THREE.MeshBasicMaterial({color:C[type],side:THREE.DoubleSide,transparent:true,opacity:.06});
-      const ring=new THREE.Mesh(rg,rm);
-      ring.rotation.x=Math.PI/2+(Math.random()-.5)*.7;
-      ring.position.copy(m.position);
-      scene.add(ring,m);
-      nodes.push({m,ring,type,ph:Math.random()*Math.PI*2,sp:.15+Math.random()*.25,
-        col:C[type],dim:false,lit:false,
+      const sz=type==='p'?.55:type==='s'?.85:1.2;
+
+      // Outer soft halo — large, faint, additive
+      const haloMat=new THREE.SpriteMaterial({
+        map:glowTextures[type],color:0xffffff,
+        transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false
+      });
+      const halo=new THREE.Sprite(haloMat);
+      halo.scale.set(sz*2.0,sz*2.0,1);
+      halo.position.set(Math.cos(a)*r,(Math.random()-.5)*ySpread,Math.sin(a)*r);
+      scene.add(halo);
+
+      // Bright core — small, sharp falloff, additive
+      const coreMat=new THREE.SpriteMaterial({
+        map:whiteGlow,color:C[type],
+        transparent:true,opacity:.95,blending:THREE.AdditiveBlending,depthWrite:false
+      });
+      const core=new THREE.Sprite(coreMat);
+      core.scale.set(sz*.9,sz*.9,1);
+      core.position.copy(halo.position);
+      scene.add(core);
+
+      nodes.push({m:core,ring:halo,type,ph:Math.random()*Math.PI*2,sp:.15+Math.random()*.25,
+        col:C[type],dim:false,lit:false,baseSz:sz,
         baseAngle:a,baseR:r,orbitSpd:(Math.random()-.5)*.0025,
-        baseY:m.position.y,ySpd:.006+Math.random()*.01});
+        baseY:halo.position.y,ySpd:.006+Math.random()*.01});
     }
   }
   mkLayer('p',20,11,7); mkLayer('s',12,6.5,5); mkLayer('c',7,3,3.5);
@@ -780,7 +817,7 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.le
     for(let i=0;i<Math.min(n,fN.length);i++){
       const f=fN[i],t=tN[Math.floor(Math.random()*tN.length)];
       const geo=new THREE.BufferGeometry().setFromPoints([f.m.position.clone(),t.m.position.clone()]);
-      const mat=new THREE.LineBasicMaterial({color:0x0033FF,transparent:true,opacity:.14});
+      const mat=new THREE.LineBasicMaterial({color:0x0033FF,transparent:true,opacity:.14,blending:THREE.AdditiveBlending,depthWrite:false});
       scene.add(new THREE.Line(geo,mat));
       edges.push({line:scene.children[scene.children.length-1],f,t,mat,ph:Math.random()*Math.PI*2,baseLit:false});
     }
@@ -791,9 +828,12 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.le
   const pulses=[];
   edges.forEach(e=>{
     for(let i=0;i<(Math.random()<.5?1:2);i++){
-      const geo=new THREE.SphereGeometry(.055,6,6);
-      const mat=new THREE.MeshBasicMaterial({color:0x99ADFF,transparent:true,opacity:0});
-      const mesh=new THREE.Mesh(geo,mat);
+      const mat=new THREE.SpriteMaterial({
+        map:whiteGlow,color:0x99ADFF,transparent:true,opacity:0,
+        blending:THREE.AdditiveBlending,depthWrite:false
+      });
+      const mesh=new THREE.Sprite(mat);
+      mesh.scale.set(.5,.5,1);
       scene.add(mesh);
       pulses.push({mesh,edge:e,prog:Math.random(),spd:.003+Math.random()*.005});
     }
@@ -821,18 +861,18 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.le
   // Layer 2: Mid dust clouds — medium, colored
   // Layer 3: Core glow — tight, bright, fast breathing
   const nebulaLayers=[
-    // Outer haze — deep navy blue
-    {col:0x001466,count:1200,sx:28,sy:14,sz:28,size:.12,opacity:.22,breatheSpd:.15,breatheAmp:.07},
+    // Outer haze — deep navy blue, large soft clouds, closer to camera range
+    {col:0x001466,count:900,sx:20,sy:11,sz:20,size:.9,opacity:.35,breatheSpd:.15,breatheAmp:.1},
     // Mid electric blue cloud
-    {col:0x0033FF,count:700,sx:16,sy:9,sz:16,size:.09,opacity:.18,breatheSpd:.22,breatheAmp:.09},
+    {col:0x0033FF,count:600,sx:13,sy:7,sz:13,size:.75,opacity:.3,breatheSpd:.22,breatheAmp:.12},
     // Bright blue offset cloud
-    {col:0x335CFF,count:900,sx:18,sy:10,sz:18,size:.10,opacity:.20,breatheSpd:.18,breatheAmp:.08},
+    {col:0x335CFF,count:700,sx:14,sy:8,sz:14,size:.8,opacity:.32,breatheSpd:.18,breatheAmp:.1},
     // Cyan accent wisps
-    {col:0x2FFFC4,count:500,sx:10,sy:6,sz:10,size:.08,opacity:.22,breatheSpd:.3,breatheAmp:.1},
+    {col:0x2FFFC4,count:400,sx:8,sy:5,sz:8,size:.65,opacity:.35,breatheSpd:.3,breatheAmp:.14},
     // Periwinkle inner glow
-    {col:0x6685FF,count:400,sx:6,sy:4,sz:6,size:.07,opacity:.30,breatheSpd:.4,breatheAmp:.12},
-    // Fine dust — deep blue everywhere
-    {col:0x0029CC,count:600,sx:24,sy:12,sz:24,size:.05,opacity:.14,breatheSpd:.1,breatheAmp:.05},
+    {col:0x99ADFF,count:350,sx:5,sy:3.5,sz:5,size:.55,opacity:.4,breatheSpd:.4,breatheAmp:.16},
+    // Fine bright dust — deep blue, smaller but punchy
+    {col:0x6685FF,count:500,sx:18,sy:9,sz:18,size:.35,opacity:.28,breatheSpd:.1,breatheAmp:.08},
   ];
 
   const nebulas=nebulaLayers.map(cfg=>{
@@ -854,7 +894,8 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.le
     geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
     const mat=new THREE.PointsMaterial({
       color:cfg.col,size:cfg.size,transparent:true,
-      opacity:cfg.opacity,sizeAttenuation:true,depthWrite:false
+      opacity:cfg.opacity,sizeAttenuation:true,depthWrite:false,
+      map:whiteGlow,blending:THREE.AdditiveBlending,alphaTest:.001
     });
     const pts=new THREE.Points(geo,mat);
     scene.add(pts);
@@ -862,19 +903,22 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.le
   });
 
   // ── STAR FIELD — three tiers ──────────────────────────────────
-  [[400,.055,.5,0xCCD6FF],[200,.1,.7,0xFFFFFF],[80,.18,1,0x99ADFF]].forEach(([count,size,opacity,col])=>{
+  [[300,.22,.7,0xCCD6FF],[150,.32,.85,0xFFFFFF],[50,.5,1,0x99ADFF]].forEach(([count,size,opacity,col])=>{
     const geo=new THREE.BufferGeometry();
     const pos=new Float32Array(count*3);
     for(let i=0;i<count;i++){
-      pos[i*3]=(Math.random()-.5)*140; pos[i*3+1]=(Math.random()-.5)*80; pos[i*3+2]=(Math.random()-.5)*140;
+      pos[i*3]=(Math.random()-.5)*70; pos[i*3+1]=(Math.random()-.5)*40; pos[i*3+2]=(Math.random()-.5)*70;
     }
     geo.setAttribute('position',new THREE.BufferAttribute(pos,3));
-    scene.add(new THREE.Points(geo,new THREE.PointsMaterial({color:col,size,transparent:true,opacity,sizeAttenuation:true,depthWrite:false})));
+    scene.add(new THREE.Points(geo,new THREE.PointsMaterial({
+      color:col,size,transparent:true,opacity,sizeAttenuation:true,depthWrite:false,
+      map:whiteGlow,blending:THREE.AdditiveBlending,alphaTest:.001
+    })));
   });
 
   // ── GRID ──────────────────────────────────────────────────────
   const grid=new THREE.GridHelper(100,70,0x000A33,0x000520);
-  grid.position.y=-12; grid.material.transparent=true; grid.material.opacity=.25;
+  grid.position.y=-12; grid.material.transparent=true; grid.material.opacity=.4;
   scene.add(grid);
 
   // ── INTERACTION ───────────────────────────────────────────────
@@ -935,19 +979,25 @@ document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.le
     // ── Nodes: orbital drift + Y float ───────────────────────────
     nodes.forEach(n=>{
       n.baseAngle+=n.orbitSpd;
-      n.m.position.set(
+      const pos=new THREE.Vector3(
         Math.cos(n.baseAngle)*n.baseR,
         n.baseY+Math.sin(t*n.ySpd+n.ph)*1.4,
         Math.sin(n.baseAngle)*n.baseR
       );
-      n.ring.position.copy(n.m.position);
-      const pulse=.9+Math.sin(t*n.sp+n.ph)*.1;
-      n.m.scale.setScalar(pulse*(n.lit?1.8:1));
-      n.ring.material.opacity=n.lit?.28:.04+Math.sin(t*n.sp*.6+n.ph)*.04;
-      n.ring.rotation.z+=.004*n.sp;
+      n.m.position.copy(pos);
+      n.ring.position.copy(pos);
+
+      const pulse=.88+Math.sin(t*n.sp+n.ph)*.14;
+      const sz=n.baseSz*pulse*(n.lit?1.7:n.dim?.7:1);
+      n.m.scale.set(sz*.9,sz*.9,1);
+      n.ring.scale.set(sz*2.0,sz*2.0,1);
+
+      n.m.material.opacity=n.lit?1:n.dim?.25:.85+Math.sin(t*n.sp*.6+n.ph)*.1;
+      n.ring.material.opacity=n.lit?.75:n.dim?.12:.4+Math.sin(t*n.sp*.5+n.ph)*.15;
+
       const col=new THREE.Color(n.col);
-      if(n.dim)col.multiplyScalar(.12); else if(n.lit)col.multiplyScalar(2);
-      n.m.material.color.lerp(col,.07);
+      if(n.lit) col.multiplyScalar(1.6);
+      n.m.material.color.lerp(col,.08);
     });
 
     // ── Edges ─────────────────────────────────────────────────────
