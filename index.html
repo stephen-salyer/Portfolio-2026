@@ -144,8 +144,9 @@ h1.hero-h em{font-style:italic;color:var(--accent);font-weight:500}
   display:grid;grid-template-columns:repeat(4,1fr);
   border-top:1px solid var(--line);
 }
-.wt-cell{padding:22px 24px 6px 0;border-right:1px solid var(--line)}
-.wt-cell:last-child{border-right:none}
+.wt-cell{padding:22px 28px 14px 0;border-right:1px solid var(--line)}
+.wt-cell+.wt-cell{padding-left:28px}
+.wt-cell:last-child{border-right:none;padding-right:0}
 .wt-n{font-family:var(--display);font-size:clamp(30px,3vw,44px);font-weight:400;line-height:1.1;font-variation-settings:'opsz' 72}
 .wt-n sup{font-size:.45em;color:var(--accent);font-weight:500}
 .wt-l{font-family:var(--label);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-top:6px;line-height:1.5}
@@ -181,6 +182,7 @@ section{padding:88px 0;border-bottom:1px solid var(--line)}
   transition:opacity .3s,transform .3s;
 }
 .chip-swatch{
+  display:block;
   width:104px;height:66px;border-radius:2px;
   border:1px solid rgba(0,0,0,.18);
   box-shadow:inset 0 0 0 3px var(--mat), 0 1px 2px rgba(0,0,0,.12);
@@ -188,7 +190,7 @@ section{padding:88px 0;border-bottom:1px solid var(--line)}
   transition:box-shadow .25s,transform .25s;
 }
 .chip-name{font-size:11.5px;font-weight:500;letter-spacing:.04em;color:var(--ink2);display:block}
-.chip-hex{font-size:10.5px;letter-spacing:.06em;color:var(--ink3)}
+.chip-hex{display:block;font-size:10.5px;letter-spacing:.06em;color:var(--ink3)}
 .chip:hover .chip-swatch{transform:translateY(-3px)}
 .chip.dim{opacity:.28}
 .chip.lit .chip-swatch{box-shadow:inset 0 0 0 3px var(--mat), 0 0 0 2px var(--accent), 0 6px 14px -6px rgba(0,0,0,.35);transform:translateY(-3px)}
@@ -313,9 +315,10 @@ footer{border-top:1px solid var(--line);padding:26px 0}
   .wrap{padding:0 22px}
   .hd-nav{display:none}
   #hero{padding:64px 0 60px}
-  .hero-epi{font-size:19px}
+  .hero-epi{font-size:20px}
   .wall-text{grid-template-columns:1fr 1fr}
-  .wt-cell{border-right:none;border-bottom:1px solid var(--line);padding:18px 0 14px}
+  .wt-cell{padding:18px 0 14px;border-right:none;border-bottom:1px solid var(--line)}
+  .wt-cell+.wt-cell{padding-left:0}
   .wt-cell:nth-child(odd){padding-right:18px;border-right:1px solid var(--line)}
   .wt-cell:nth-child(even){padding-left:18px}
   .wt-cell:nth-last-child(-n+2){border-bottom:none}
@@ -325,13 +328,19 @@ footer{border-top:1px solid var(--line);padding:26px 0}
   .plate-pair{grid-template-columns:1fr}
   .practice{grid-template-columns:1fr;gap:48px}
   .idx-row{grid-template-columns:44px 1fr;gap:14px}
-  .idx-d{grid-column:2}
+  .idx-d{grid-column:2;font-size:14.5px}
   .prov-item{grid-template-columns:1fr;gap:14px;padding:36px 0}
   .contact-grid{grid-template-columns:1fr;gap:44px}
-  .chip-swatch{width:88px;height:56px}
-  body{font-size:18px}
-  .plate-d,.prov-d{font-size:17.5px}
-  .c-v{font-size:19px}
+  .chip-swatch{width:88px;height:56px;margin-bottom:10px}
+  .chip-name{font-size:12.5px}
+  .chip-hex{font-size:11.5px}
+  body{font-size:19px}
+  .sec-note{font-size:20px}
+  .plate-medium{font-size:18px}
+  .plate-d,.prov-d{font-size:18.5px}
+  .practice-body p{font-size:19px}
+  .contact-sub{font-size:20px}
+  .c-v{font-size:20px}
 }
 </style>
 </head>
